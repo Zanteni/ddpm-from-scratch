@@ -5,20 +5,25 @@ from ddpm.models.embeddings.sinusoidal_time_embedding import SinusoidalTimeEmbed
 
 
 class TimestepMLP(nn.Module):
+    """
+    Projects the fixed sinusoidal timestep embedding through a small
+    learnable MLP (Linear -> SiLU -> Linear). The sinusoidal embedding
+    alone is fixed and non-learnable; this MLP lets the network learn
+    how to actually use timestep information downstream, and produces
+    the final `t_emb` vector shared across every ResidualBlock in the UNet.
+    """
+
     def __init__(self, embedding_dim, hidden_dim, out_dim):
         super().__init__()
         self.embedding_dim = embedding_dim
         self.hidden_dim = hidden_dim
         self.out_dim = out_dim
-        # TODO: create self.sinusoidal (SinusoidalTimeEmbedding)
+
         self.sinusoidal = SinusoidalTimeEmbedding(dim=embedding_dim)
-        # TODO: create self.linear1 (Linear: embedding_dim -> hidden_dim)
-        self.linear1 = Linear(in_features=embedding_dim,out_features=hidden_dim)
-        # TODO: create self.linear2 (Linear: hidden_dim -> out_dim)
-        self.linear2 = Linear(in_features=hidden_dim,out_features=out_dim)
+        self.linear1 = Linear(in_features=embedding_dim, out_features=hidden_dim)
+        self.linear2 = Linear(in_features=hidden_dim, out_features=out_dim)
 
     def forward(self, t):
-        # TODO: sinusoidal -> linear1 -> silu -> linear2
         t = self.sinusoidal(t)
         t = self.linear1(t)
         t = F.silu(t)
