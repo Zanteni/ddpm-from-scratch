@@ -84,7 +84,23 @@ def test_mismatched_channels_raises():
         pass
     print("[OK] Mismatched input channels correctly raises AssertionError")
 
+def test_gradients_flow_to_gamma_and_beta():
+    gn = GroupNorm(num_groups=4, num_channels=16)
+    x = torch.randn(2, 16, 8, 8, requires_grad=True)
 
+    out = gn(x)
+    loss = out.sum()
+    loss.backward()
+
+    assert gn.gamma.grad is not None, "gamma has no gradient"
+    assert gn.beta.grad is not None, "beta has no gradient"
+    assert not torch.all(gn.gamma.grad == 0), "gamma gradient is all zeros"
+    assert not torch.all(gn.beta.grad == 0), "beta gradient is all zeros"
+    assert x.grad is not None, "input x has no gradient"
+
+    print(f"[OK] gamma.grad shape : {gn.gamma.grad.shape}")
+    print(f"[OK] beta.grad shape  : {gn.beta.grad.shape}")
+    print("[OK] Gradients flow correctly to gamma, beta, and input x")
 if __name__ == "__main__":
     print("===== GROUPNORM TEST =====")
     test_output_shape()
@@ -94,4 +110,5 @@ if __name__ == "__main__":
     test_gamma_beta_are_learnable_parameters()
     test_invalid_num_groups_raises()
     test_mismatched_channels_raises()
+    test_gradients_flow_to_gamma_and_beta()
     print("ALL TESTS PASSED")
