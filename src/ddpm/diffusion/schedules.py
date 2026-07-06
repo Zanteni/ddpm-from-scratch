@@ -10,14 +10,49 @@ avoids recomputing this math at every training step.
 """
 
 import torch
+import math
 
 
-def get_beta_schedule(timesteps, beta_start=1e-4, beta_end=0.02):
+def get_beta_schedule(schedule_type, timesteps, beta_start=1e-4, beta_end=0.02):
     """
-    Linear beta schedule from the original DDPM paper: betas increase
-    linearly from beta_start to beta_end over T steps.
+    Returns a 1D tensor of betas, shape (timesteps,).
+
+    Args:
+        schedule_type: "linear" or "cosine"
+        timesteps: total number of diffusion steps T
+        beta_start, beta_end: only used for the linear schedule
+    """
+    if schedule_type == "linear":
+        return _linear_beta_schedule(timesteps, beta_start, beta_end)
+    elif schedule_type == "cosine":
+        return _cosine_beta_schedule(timesteps)
+    else:
+        raise ValueError(f"Unknown schedule_type: {schedule_type}")
+
+
+def _linear_beta_schedule(timesteps, beta_start, beta_end):
+    """
+    Original DDPM schedule: betas increase linearly, evenly spaced,
+    from beta_start to beta_end over T steps.
     """
     return torch.linspace(beta_start, beta_end, timesteps)
+
+
+def _cosine_beta_schedule(timesteps, s=0.008):
+    """
+    Cosine schedule from Nichol & Dhariwal, "Improved DDPM" (2021).
+    Unlike the linear schedule, betas here are NOT evenly spaced — the
+    curve is defined via a cosine shape on alpha_bar directly, keeping
+    alpha_bar closer to 1 (less noise) for longer near t=0, then
+    transitioning faster later. This avoids destroying image structure
+    too early, which the paper found improved sample quality.
+    """
+    steps = timesteps + 1
+    t = torch.linspace(0, timesteps, steps) / timesteps
+    alphas_bar = torch.cos((t + s) / (1 + s) * math.pi / 2) ** 2
+    alphas_bar = alphas_bar / alphas_bar[0]  # normalize so alpha_bar_0 = 1
+    betas = 1 - (alphas_bar[1:] / alphas_bar[:-1])
+    return torch.clip(betas, min=0.0001, max=0.9999)
 
 
 def get_diffusion_constants(betas):
@@ -39,12 +74,8 @@ def get_diffusion_constants(betas):
     sqrt_alphas_cumprod = torch.sqrt(alphas_cumprod)
     sqrt_one_minus_alphas_cumprod = torch.sqrt(1.0 - alphas_cumprod)
 
-    # alpha_bar_{-1} is defined as 1 (no noise added yet), so alpha_bar_prev
-    # is alphas_cumprod shifted forward by one position.
     alphas_cumprod_prev = torch.cat([torch.tensor([1.0]), alphas_cumprod[:-1]])
 
-    # Posterior variance (DDPM paper, Eq. 6-7), derived via Bayes' rule for
-    # the true reverse process q(x_{t-1} | x_t, x_0).
     posterior_variance = betas * (1.0 - alphas_cumprod_prev) / (1.0 - alphas_cumprod)
 
     return {
