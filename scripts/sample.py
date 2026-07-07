@@ -22,7 +22,7 @@ def main():
     )
     optimizer = torch.optim.AdamW(model.parameters(), lr=2e-4)  # needed for load_checkpoint's signature
 
-    epoch = load_checkpoint(model, optimizer, path="checkpoints/final.pt", device=device)
+    epoch = load_checkpoint(model, optimizer, None, path="checkpoints/final.pt", device=device)
     print(f"Loaded checkpoint from epoch {epoch}")
 
     model.to(device)

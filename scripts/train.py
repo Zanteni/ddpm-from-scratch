@@ -28,20 +28,22 @@ def main():
     )
 
     # --- Data ---
-    dataloader = get_cifar10_dataloader(root="./data", batch_size=128, train=True, download=True)
+    dataloader = get_cifar10_dataloader(root="./data", batch_size=64, train=True, download=True)
 
     # --- Optimizer ---
     optimizer = torch.optim.AdamW(model.parameters(), lr=2e-4)
-
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50)
     # --- Train ---
     trained_model = train(
         model, dataloader, optimizer, timesteps,
         sqrt_alphas_cumprod, sqrt_one_minus_alphas_cumprod,
-        num_epochs=10, device=device, log_every=100,
+        num_epochs=50, device=device, log_every=100,
+        scheduler=scheduler,
+        checkpoint_path="checkpoints/latest.pt",
     )
 
     # --- Save final checkpoint ---
-    save_checkpoint(trained_model, optimizer, epoch=10, path="checkpoints/final.pt")
+    save_checkpoint(trained_model, optimizer, scheduler, epoch=50, path="checkpoints/final.pt")
     print("Training complete, checkpoint saved.")
 
 
