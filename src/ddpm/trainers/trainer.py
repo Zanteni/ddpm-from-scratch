@@ -7,6 +7,7 @@ process's closed-form shortcut to jump straight to x_t.
 """
 
 import torch
+import time
 from ddpm.diffusion.losses import compute_loss
 from ddpm.utils.checkpoint import save_checkpoint
 
@@ -51,7 +52,7 @@ def train(model, dataloader, optimizer, timesteps, sqrt_alphas_cumprod,
                                sqrt_alphas_cumprod, sqrt_one_minus_alphas_cumprod, device)
 
             if batch_idx % log_every == 0:
-                print(f"Epoch {epoch} | Batch {batch_idx} | Loss: {loss:.4f}")
+                print(f"Epoch {epoch} | Batch {batch_idx} | Loss: {loss:.4f} | Time: {time.strftime('%H:%M:%S')}")
 
         if checkpoint_path is not None:
             save_checkpoint(model, optimizer, epoch, checkpoint_path)
