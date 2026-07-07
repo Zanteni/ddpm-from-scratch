@@ -52,7 +52,7 @@ def train(model, dataloader, optimizer, timesteps, sqrt_alphas_cumprod,
             scheduler.step()
 
         if checkpoint_path is not None:
-            save_checkpoint(model, optimizer, epoch, checkpoint_path)
+            save_checkpoint(model, optimizer, scheduler, epoch, checkpoint_path)
             print(f"Saved checkpoint after epoch {epoch}")
 
     return model

@@ -20,7 +20,7 @@ def save_checkpoint(model, optimizer, scheduler, epoch, path):
     checkpoint = {
         "model_state": model_state,
         "optimizer_state": optimizer.state_dict(),
-        "scheduler_state": scheduler.state_dict(),
+        "scheduler_state": scheduler.state_dict() if scheduler is not None else None,
         "epoch": epoch,
     }
 
@@ -46,7 +46,7 @@ def load_checkpoint(model, optimizer, scheduler, path, device="cpu"):
         checkpoint["optimizer_state"]
     )
 
-    if "scheduler_state" in checkpoint:
+    if scheduler is not None and checkpoint.get("scheduler_state") is not None:
         scheduler.load_state_dict(
             checkpoint["scheduler_state"]
         )
