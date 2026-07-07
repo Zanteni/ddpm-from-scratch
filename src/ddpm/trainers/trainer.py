@@ -18,7 +18,7 @@ def train_step(model, optimizer, x_0, timesteps, sqrt_alphas_cumprod,
     """
     x_0 = x_0.to(device)
     B = x_0.shape[0]
-    t = torch.randint(0, timesteps, (B,))
+    t = torch.randint(0, timesteps, (B,),evice=device)
 
     optimizer.zero_grad()
     loss = compute_loss(model=model, x_0=x_0, t=t,
