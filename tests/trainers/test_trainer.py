@@ -17,7 +17,7 @@ def test_train_step_reduces_loss_over_many_steps():
     model = UNet(in_channels=C, base_channels=16, channel_mults=(1, 2), time_emb_dim=64,
                  num_layers=1, num_groups=4, image_size=H, attn_resolution=8)
     model.train()
-    optimizer = torch.optim.Adam(model.parameters(), lr=2e-4)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=2e-4)
 
     x_0 = torch.randn(B, C, H, W)
 
