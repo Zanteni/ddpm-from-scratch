@@ -9,10 +9,19 @@ Lower FID = generated images are statistically closer to real ones.
 InceptionV3 is used as a fixed, pretrained feature extractor rather than
 reimplemented from scratch — it's a standard, borrowed tool (like
 torchvision's CIFAR10 loader), not something specific to diffusion models.
+
+Note: FID requires a substantial sample size to be numerically stable and
+meaningful (typically thousands of images for both real and generated
+sets) — with too few samples, the covariance matrices become singular and
+the result becomes unreliable.
 """
 
 import numpy as np
 from scipy.linalg import sqrtm
+import torch
+import torch.nn.functional as F
+from torchvision.models import inception_v3, Inception_V3_Weights
+from ddpm.datasets.transforms import unnormalize_to_zero_to_one
 
 
 def compute_fid(real_features, fake_features):
@@ -42,3 +51,35 @@ def compute_fid(real_features, fake_features):
 
     fid = dist + trace_term
     return float(fid)
+
+
+def load_inception_model(device="cpu"):
+    """
+    Loads a pretrained InceptionV3, configured to output pooled features
+    (2048-dim) rather than classification logits.
+    """
+    model = inception_v3(weights=Inception_V3_Weights.DEFAULT, aux_logits=True)
+    model.fc = torch.nn.Identity()
+    model.eval()
+    model.to(device)
+    return model
+
+
+def get_inception_features(images, model, device="cpu"):
+    """
+    Args:
+        images: (N, 3, H, W), values in [-1, 1] (DDPM's normalization)
+    Returns:
+        (N, 2048) feature tensor
+    """
+    images_01 = unnormalize_to_zero_to_one(images)
+    images_resized = F.interpolate(images_01, size=(299, 299), mode="bilinear", align_corners=False)
+
+    mean = torch.tensor([0.485, 0.456, 0.406], device=device).view(1, 3, 1, 1)
+    std = torch.tensor([0.229, 0.224, 0.225], device=device).view(1, 3, 1, 1)
+    images_normalized = (images_resized - mean) / std
+
+    with torch.no_grad():
+        features = model(images_normalized)
+
+    return features
