@@ -8,6 +8,7 @@ process's closed-form shortcut to jump straight to x_t.
 
 import torch
 from ddpm.diffusion.losses import compute_loss
+from ddpm.utils.checkpoint import save_checkpoint
 
 
 def train_step(model, optimizer, x_0, timesteps, sqrt_alphas_cumprod,
@@ -30,11 +31,16 @@ def train_step(model, optimizer, x_0, timesteps, sqrt_alphas_cumprod,
 
 
 def train(model, dataloader, optimizer, timesteps, sqrt_alphas_cumprod,
-          sqrt_one_minus_alphas_cumprod, num_epochs=10, device="cpu", log_every=100):
+          sqrt_one_minus_alphas_cumprod, num_epochs=10, device="cpu", log_every=100,
+          checkpoint_path=None):
     """
     Full training loop: iterates over the dataloader for num_epochs,
     calling train_step on every batch. Labels from the dataloader are
     discarded — DDPM here is unconditional, it doesn't use class labels.
+
+    If checkpoint_path is given, saves model + optimizer state after every
+    epoch, so long training runs can survive interruptions (e.g. a Kaggle
+    session timeout) without losing all progress.
     """
     model.to(device)
     model.train()
@@ -46,5 +52,9 @@ def train(model, dataloader, optimizer, timesteps, sqrt_alphas_cumprod,
 
             if batch_idx % log_every == 0:
                 print(f"Epoch {epoch} | Batch {batch_idx} | Loss: {loss:.4f}")
+
+        if checkpoint_path is not None:
+            save_checkpoint(model, optimizer, epoch, checkpoint_path)
+            print(f"Saved checkpoint after epoch {epoch}")
 
     return model
