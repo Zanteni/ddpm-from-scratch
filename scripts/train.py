@@ -32,18 +32,18 @@ def main():
 
     # --- Optimizer ---
     optimizer = torch.optim.AdamW(model.parameters(), lr=2e-4)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=20)
     # --- Train ---
     trained_model = train(
         model, dataloader, optimizer, timesteps,
         sqrt_alphas_cumprod, sqrt_one_minus_alphas_cumprod,
-        num_epochs=50, device=device, log_every=100,
+        num_epochs=20, device=device, log_every=100,
         scheduler=scheduler,
         checkpoint_path="checkpoints/latest.pt",
     )
 
     # --- Save final checkpoint ---
-    save_checkpoint(trained_model, optimizer, scheduler, epoch=50, path="checkpoints/final.pt")
+    save_checkpoint(trained_model, optimizer, scheduler, epoch=20, path="checkpoints/final.pt")
     print("Training complete, checkpoint saved.")
 
 
