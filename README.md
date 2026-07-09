@@ -226,7 +226,7 @@ where
 
 - $\beta_{t}$ is the noise schedule
 - $\alpha_{t} = 1-\beta_{t}$
-- $\bar{\alpha}_{t}=\prod_{s=1}^{t}\alpha_{s}$
+- $\bar{\alpha}\_{t}=\prod\_{s=1}^{t}\alpha\_{s}$
 
 Using the reparameterization trick, we can directly sample any timestep without iteratively adding noise:
 
