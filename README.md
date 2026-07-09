@@ -224,9 +224,9 @@ $q(x_t|x_{t-1})=\mathcal{N}\left(\sqrt{\alpha_t}x_{t-1},(1-\alpha_t)I\right)$
 
 where
 
-- $\beta_t$ is the noise schedule
-- $\alpha_t = 1-\beta_t$
-- $\bar{\alpha}_t=\prod_{s=1}^{t}\alpha_s$
+- $\beta_{t}$ is the noise schedule
+- $\alpha_{t} = 1-\beta_{t}$
+- $\bar{\alpha}_{t}=\prod_{s=1}^{t}\alpha_{s}$
 
 Using the reparameterization trick, we can directly sample any timestep without iteratively adding noise:
 
