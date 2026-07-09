@@ -124,7 +124,6 @@ Custom neural network layers:
 - Cosine Annealing Scheduler
 - Checkpoint Saving & Loading
 - Resume Training
-- Multi-GPU Training (DataParallel)
 - Random Seed Utilities
 
 ---
@@ -199,6 +198,7 @@ The repository is organized into independent modules to make every component eas
 | `scripts/` | Training and sampling entry points |
 
 The modular design makes it straightforward to understand each individual component without navigating a monolithic implementation.
+
 # Mathematical Background
 
 Denoising Diffusion Probabilistic Models (DDPM), introduced by **Ho et al. (2020)**, are a class of generative models that learn to generate realistic images by gradually reversing a stochastic noising process.
@@ -442,6 +442,7 @@ Update Parameters
 ```
 
 This process is repeated for every mini-batch until the model learns to accurately estimate the added Gaussian noise.
+
 ---
 
 # Results
