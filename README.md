@@ -402,6 +402,10 @@ The model was trained on **CIFAR-10** using the following configuration.
 | Residual Blocks / Stage | 2 |
 | GroupNorm Groups | 32 |
 | Attention Resolution | 16 × 16 |
+| Total Parameters | ~37.2M |
+| Epochs Trained | 20 |
+| Hardware | Kaggle GPU T4 ×2 |
+| Training Duration | ~6h 8min |
 
 ---
 
@@ -452,7 +456,23 @@ Some generated samples are shown below.
     <img src="assets/generated_samples.png" width="700">
 </p>
 
-The quality of the generated images improves as training progresses and can be further enhanced through longer training, improved sampling techniques, and additional architectural improvements.
+The quality of the generated images improves as training progresses and can
+be further enhanced through longer training, improved sampling techniques,
+and additional architectural improvements.
+
+---
+
+# Limitations
+
+This model was trained for only **20 epochs** (~6h 8min) on Kaggle's GPU T4 ×2,
+which is short compared to typical DDPM training runs — the original paper
+trains for the equivalent of hundreds of thousands of steps, often over days
+on multi-GPU setups. As a result, generated samples are recognizable but not
+yet fully sharp/photorealistic. Since the ~37M parameter U-Net is comparable
+in size to the original paper's CIFAR-10 model, the gap in quality is almost
+entirely due to limited training time rather than architecture capacity —
+more epochs, EMA, and the improvements listed under Future Work should close
+most of the remaining gap.
 
 ---
 
